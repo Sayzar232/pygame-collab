@@ -32,21 +32,53 @@ class Game:
 
         return name, author, description, icon, version
 
+
 class Card:
-    def __init__(self, icon, name, author, description, num):
+    ICON_SIZE = 250
+    INDENT = 25
+    FONT_NAME = "Arial"
+    NAME_FONT_SIZE = 48
+    AUTHOR_FONT_SIZE = 24
+    DESCRIPTION_FONT_SIZE = 20
+    TEXT_COLOR = (255, 255, 255)
+
+    def __init__(self, icon, name, author, description, rect):
         self.icon = icon
         self.name = name
         self.author = author
         self.description = description
-        self.num = num
+        self.rect = rect
+
+        self.icon_image = pygame.transform.scale(pygame.image.load(icon), (self.ICON_SIZE, self.ICON_SIZE))
 
     def draw(self, screen):
-        icon = pygame.image.load(self.icon)
-        icon = pygame.transform.scale(icon, (CARD_X, CARD_Y))
-        
-        card_dx = self.num % 3 * CARD_X
-        card_dy = self.num // 3 * CARD_Y
-        pygame.draw.rect(screen, (50, 50, 50), (CARD_INDENT + card_dx, CARD_INDENT + card_dy, CARD_X, CARD_Y), border_radius=10)
+        pygame.draw.rect(screen, (50, 50, 50), self.rect, border_radius=10)
+
+        icon = self.icon_image
+        screen.blit(icon, (self.rect.x + self.INDENT, self.rect.y + self.INDENT))
+
+        # Render fonts amd texts
+        name_font = pygame.font.SysFont(self.FONT_NAME, self.NAME_FONT_SIZE)
+        name_text = name_font.render(self.name, 1, self.TEXT_COLOR)
+
+        author_font = pygame.font.SysFont(self.FONT_NAME, self.AUTHOR_FONT_SIZE)
+        author_text = author_font.render("by " + self.author, 1, self.TEXT_COLOR)
+
+        description_font = pygame.font.SysFont(self.FONT_NAME, self.DESCRIPTION_FONT_SIZE)
+        description_text = description_font.render(self.description, 1, self.TEXT_COLOR)
+
+        rect_center = CARD_X // 2 + self.rect.x
+
+        # Center the rects
+        name_rect = name_text.get_rect(center=(rect_center, self.rect.y + 320))
+        author_rect = author_text.get_rect(center=(rect_center, self.rect.y + 370))
+        description_rect = description_text.get_rect(center=(rect_center, self.rect.y + 400))
+
+        # Blit texts
+        screen.blit(name_text, name_rect)
+        screen.blit(author_text, author_rect)
+        screen.blit(description_text, description_rect)
+
 
 
 class Menu:
@@ -84,13 +116,12 @@ class Menu:
 
         return games
 
-    def draw_game_card(self, icon, name, author, description, num):
-        icon = pygame.image.load(icon)
-        icon = pygame.transform.scale(icon, (CARD_X, CARD_Y))
+    @classmethod
+    def get_card_rect(cls, num):
+        card_x = num % 3 * (CARD_X + CARD_INDENT) + CARD_INDENT
+        card_y = num // 3 * (CARD_Y + CARD_INDENT) + CARD_INDENT
 
-        card_dx = num % 3 * CARD_X
-        card_dy = num // 3 * CARD_Y
-        pygame.draw.rect(self.screen, (50, 50, 50), (CARD_INDENT + card_dx, CARD_INDENT + card_dy, CARD_X, CARD_Y), border_radius=10)
+        return pygame.rect.Rect(card_x, card_y, CARD_X, CARD_Y)
 
     def draw_cards(self):
         games = self.discover_games()
@@ -100,7 +131,9 @@ class Menu:
             name, author, description, icon, version = game.metadata
             icon_path = path + "/" + icon
 
-            card = Card(icon_path, name, author, description, num)
+            card_rect = self.get_card_rect(num)
+
+            card = Card(icon_path, name, author, description, card_rect)
 
             card.draw(self.screen)
 
@@ -119,7 +152,6 @@ class Menu:
             begin = self.handle_events()
 
             self.draw_cards()
-            
 
             pygame.display.update()
             self.clock.tick(60)
