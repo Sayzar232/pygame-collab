@@ -81,17 +81,23 @@ class Snake:
 
 
 class Food:
-    def __init__(self):
-        self.position = self.random_position()
+    def __init__(self, forbidden_positions: list[tuple[int, int]] | None = None):
+        self.position = (0, 0)
+        self.respawn(forbidden_positions or [])
 
-    def random_position(self):
-        return (
-            random.randint(0, WIDTH // CELL_SIZE - 1) * CELL_SIZE,
-            random.randint(0, HEIGHT // CELL_SIZE - 1) * CELL_SIZE
-        )
+    def random_position(self, forbidden_positions: list[tuple[int, int]]) -> tuple[int, int]:
+        all_positions = [
+            (x * CELL_SIZE, y * CELL_SIZE)
+            for x in range(WIDTH // CELL_SIZE)
+            for y in range(HEIGHT // CELL_SIZE)
+            if (x * CELL_SIZE, y * CELL_SIZE) not in forbidden_positions
+        ]
+        if all_positions:
+            return random.choice(all_positions)
+        return (0, 0)
 
-    def respawn(self):
-        self.position = self.random_position()
+    def respawn(self, forbidden_positions: list[tuple[int, int]]):
+        self.position = self.random_position(forbidden_positions)
 
     def draw(self, screen):
         pygame.draw.rect(
@@ -120,7 +126,7 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.snake = Snake()
-        self.food = Food()
+        self.food = Food(self.snake.body)
 
         self.score = 0
         self.running = True
@@ -168,7 +174,7 @@ class Game:
         # Проверка еды
         if self.snake.get_head() == self.food.position:
             self.snake.grow()
-            self.food.respawn()
+            self.food.respawn(self.snake.body)
             self.score += 1
 
         # Проверка проигрыша
@@ -208,7 +214,7 @@ class Game:
 
     def restart(self):
         self.snake = Snake()
-        self.food = Food()
+        self.food = Food(self.snake.body)
         self.score = 0
         self.game_over = False
 
