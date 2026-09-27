@@ -21,6 +21,9 @@ class Game:
         self.icon = metadata.get("icon")
         self.version = metadata.get("version")
 
+    def launch(self):
+        self.module.run()
+
 
 class Card:
     ICON_SIZE = 250
@@ -31,7 +34,8 @@ class Card:
     DESCRIPTION_FONT_SIZE = 20
     TEXT_COLOR = (255, 255, 255)
 
-    def __init__(self, icon, name, author, description, rect):
+    def __init__(self, icon, name, author, description, rect, game):
+        self.game = game
         self.icon = icon
         self.name = name
         self.author = author
@@ -68,12 +72,20 @@ class Card:
         screen.blit(author_text, author_rect)
         screen.blit(description_text, description_rect)
 
+    def handle_click(self, pos):
+        if self.rect.collidepoint(pos):
+            self.game.launch()
+            return True
+        return False
+
 
 class Menu:
     def __init__(self, width: int = 1000, height: int = 800):
         self.width = width
         self.height = height
         self.clock = pygame.time.Clock()
+        self.games = self.discover_games()
+        self.cards = self.get_cards()
 
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Pygame Collab")
@@ -111,26 +123,40 @@ class Menu:
 
         return pygame.rect.Rect(card_x, card_y, CARD_X, CARD_Y)
 
-    def draw_cards(self):
-        games = self.discover_games()
+    def get_cards(self):
+        cards = []
 
-        for num, game in enumerate(games):
+        for num, game in enumerate(self.games):
             path = str(game.path)
             name, author, description = game.name, game.author, game.description
             icon = game.icon
-
+        
             icon_path = path + "/" + icon
-
+        
             card_rect = self.get_card_rect(num)
 
-            card = Card(icon_path, name, author, description, card_rect)
+            cards.append(Card(icon_path, name, author, description, card_rect, game))
 
+        return cards
+
+    def draw_cards(self):
+        for card in self.cards:
             card.draw(self.screen)
+
+    def check_card_click(self, event):
+        for card in self.cards:
+            if card.handle_click(event.pos):
+                # После выхода из игры восстанавливаем экран меню:
+                self.screen = pygame.display.set_mode((self.width, self.height))
+                pygame.display.set_caption("Pygame Collab")
+                break
 
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.check_card_click(event)
 
         return True
 
@@ -145,5 +171,6 @@ class Menu:
 
             pygame.display.update()
             self.clock.tick(60)
+
 
 menu = Menu()
