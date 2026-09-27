@@ -11,26 +11,15 @@ GAMES_DIR = Path("games")
 
 class Game:
     def __init__(self, module, path, metadata):
-        self._module = module
-        self._path = path
-        self._metadata = metadata
+        self.module = module
+        self.path = path
+        self.metadata = metadata
 
-    @property
-    def module(self):
-        return self._module
-
-    @property
-    def path(self):
-        return self._path
-
-    @property
-    def metadata(self):
-        metadata = self._metadata
-        name, author, description = metadata.get("name"), metadata.get("author"), metadata.get("description")
-        icon = metadata.get("icon")
-        version = metadata.get("version")
-
-        return name, author, description, icon, version
+        self.name = metadata.get("name")
+        self.author = metadata.get("author")
+        self.description = metadata.get("description")
+        self.icon = metadata.get("icon")
+        self.version = metadata.get("version")
 
 
 class Card:
@@ -80,7 +69,6 @@ class Card:
         screen.blit(description_text, description_rect)
 
 
-
 class Menu:
     def __init__(self, width: int = 1000, height: int = 800):
         self.width = width
@@ -128,7 +116,9 @@ class Menu:
 
         for num, game in enumerate(games):
             path = str(game.path)
-            name, author, description, icon, version = game.metadata
+            name, author, description = game.name, game.author, game.description
+            icon = game.icon
+
             icon_path = path + "/" + icon
 
             card_rect = self.get_card_rect(num)
