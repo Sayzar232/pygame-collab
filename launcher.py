@@ -182,6 +182,8 @@ class Card:
     TEXT_COLOR = (255, 255, 255)
     AUTHOR_COLOR = (180, 180, 180)
     DESC_COLOR = (220, 220, 220)
+    CARD_COLOR = (50, 50, 50)
+    CARD_HOVER_COLOR = (80, 80, 80)
 
     def __init__(self, rect: pygame.Rect, game: Game) -> None:
         self.game = game
@@ -189,11 +191,12 @@ class Card:
         self.name = game.name
         self.author = game.author
         self.description = game.description
+        self.card_color = self.CARD_COLOR
         self.icon_image = load_game_icon(game.path, game.icon, self.ICON_SIZE)
 
     def draw(self, screen: pygame.Surface) -> None:
-        # Оптимизировать создание текста и шрофтов
-        pygame.draw.rect(screen, (50, 50, 50), self.rect, border_radius=10)
+        # Оптимизировать создание текста и шрифтов
+        pygame.draw.rect(screen, self.card_color, self.rect, border_radius=10)
 
         screen.blit(self.icon_image, (self.rect.x + self.INDENT, self.rect.y + self.INDENT))
 
@@ -222,10 +225,17 @@ class Card:
             line_rect = line_surf.get_rect(center=(rect_center_x, start_y + i * line_height))
             screen.blit(line_surf, line_rect)
 
-    def handle_click(self, pos: tuple[int, int] | Sequence[int]) -> bool:
-        if self.rect.collidepoint(pos):
-            self.game.launch()
+    def handle_mouse(self, event: pygame.event.Event):
+        self.card_color = self.CARD_COLOR
+
+        if self.rect.collidepoint(event.pos):
+            if event.type == pygame.MOUSEMOTION:
+                self.card_color = self.CARD_HOVER_COLOR
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self.game.launch()
             return True
+
         return False
 
 
@@ -298,9 +308,9 @@ class Menu:
         for card in self.cards:
             card.draw(self.screen)
 
-    def check_card_click(self, event: pygame.event.Event) -> None:
+    def check_card_mouse(self, event: pygame.event.Event) -> None:
         for card in self.cards:
-            if card.handle_click(event.pos):
+            if card.handle_mouse(event):
                 pygame.event.clear()
                 break
 
@@ -308,8 +318,10 @@ class Menu:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-            if event.type == pygame.MOUSEBUTTONUP:
-                self.check_card_click(event)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self.check_card_mouse(event)
+            elif event.type == pygame.MOUSEMOTION:
+                self.check_card_mouse(event)
 
         return True
 
