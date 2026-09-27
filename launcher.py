@@ -1,5 +1,6 @@
 import pygame
 from pathlib import Path
+from typing import Any, Sequence
 import json
 import subprocess
 import sys
@@ -11,7 +12,7 @@ GAMES_DIR = Path("games")
 
 
 class Game:
-    def __init__(self, path, metadata):
+    def __init__(self, path: Path, metadata: dict[str, Any]) -> None:
         self.path = path
         self.metadata = metadata
 
@@ -22,7 +23,7 @@ class Game:
         self.version = metadata.get("version")
         self.entry_point = metadata.get("entry_point", "main.py")
 
-    def launch(self):
+    def launch(self) -> None:
         subprocess.run([sys.executable, self.entry_point], cwd=str(self.path))
 
 
@@ -35,7 +36,7 @@ class Card:
     DESCRIPTION_FONT_SIZE = 20
     TEXT_COLOR = (255, 255, 255)
 
-    def __init__(self, rect, game):
+    def __init__(self, rect: pygame.Rect, game: Game) -> None:
         self.game = game
         self.rect = rect
         self.name = game.name
@@ -48,7 +49,7 @@ class Card:
             (self.ICON_SIZE, self.ICON_SIZE)
         )
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         # Оптимизировать создание текста; вынести его в класс
         pygame.draw.rect(screen, (50, 50, 50), self.rect, border_radius=10)
 
@@ -77,7 +78,7 @@ class Card:
         screen.blit(author_text, author_rect)
         screen.blit(description_text, description_rect)
 
-    def handle_click(self, pos):
+    def handle_click(self, pos: tuple[int, int] | Sequence[int]) -> bool:
         if self.rect.collidepoint(pos):
             self.game.launch()
             return True
@@ -85,7 +86,7 @@ class Card:
 
 
 class Menu:
-    def __init__(self, width: int = 1000, height: int = 800):
+    def __init__(self, width: int = 1000, height: int = 800) -> None:
         self.width = width
         self.height = height
         self.clock = pygame.time.Clock()
@@ -95,7 +96,7 @@ class Menu:
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Pygame Collab")
 
-    def discover_games(self):
+    def discover_games(self) -> list[Game]:
         games = []
 
         for path in GAMES_DIR.iterdir():
@@ -120,39 +121,33 @@ class Menu:
         return games
 
     @classmethod
-    def get_card_rect(cls, num):
+    def get_card_rect(cls, num: int) -> pygame.Rect:
         card_x = num % 3 * (CARD_X + CARD_INDENT) + CARD_INDENT
         card_y = num // 3 * (CARD_Y + CARD_INDENT) + CARD_INDENT
 
         return pygame.rect.Rect(card_x, card_y, CARD_X, CARD_Y)
 
-    def get_cards(self):
+    def get_cards(self) -> list[Card]:
         cards = []
 
         for num, game in enumerate(self.games):
-            path = str(game.path)
-            name, author, description = game.name, game.author, game.description
-            icon = game.icon
-        
-            icon_path = path + "/" + icon
-        
             card_rect = self.get_card_rect(num)
 
             cards.append(Card(card_rect, game))
 
         return cards
 
-    def draw_cards(self):
+    def draw_cards(self) -> None:
         for card in self.cards:
             card.draw(self.screen)
 
-    def check_card_click(self, event):
+    def check_card_click(self, event: pygame.event.Event) -> None:
         for card in self.cards:
             if card.handle_click(event.pos):
                 pygame.event.clear()
                 break
 
-    def handle_events(self):
+    def handle_events(self) -> bool:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -161,7 +156,7 @@ class Menu:
 
         return True
 
-    def run(self):
+    def run(self) -> None:
         begin = True
 
         while begin:
