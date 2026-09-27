@@ -114,7 +114,7 @@ class Game:
 
         pygame.display.set_caption("Змейка")
 
-        icon = pygame.image.load("games/snake/icon.png")
+        icon = pygame.image.load("icon.png")
         pygame.display.set_icon(icon)
 
         self.clock = pygame.time.Clock()
@@ -223,7 +223,7 @@ class Game:
 
         pygame.quit()
 
-game = Game()
 
 if __name__ == "__main__":
+    game = Game()
     game.run()

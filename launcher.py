@@ -1,7 +1,8 @@
 import pygame
 from pathlib import Path
-import importlib
 import json
+import subprocess
+import sys
 
 CARD_X = 300
 CARD_Y = 500
@@ -10,8 +11,7 @@ GAMES_DIR = Path("games")
 
 
 class Game:
-    def __init__(self, module, path, metadata):
-        self.module = module
+    def __init__(self, path, metadata):
         self.path = path
         self.metadata = metadata
 
@@ -20,9 +20,10 @@ class Game:
         self.description = metadata.get("description")
         self.icon = metadata.get("icon")
         self.version = metadata.get("version")
+        self.entry_point = metadata.get("entry_point", "main.py")
 
     def launch(self):
-        self.module.run()
+        subprocess.run([sys.executable, self.entry_point], cwd=str(self.path))
 
 
 class Card:
@@ -34,17 +35,21 @@ class Card:
     DESCRIPTION_FONT_SIZE = 20
     TEXT_COLOR = (255, 255, 255)
 
-    def __init__(self, icon, name, author, description, rect, game):
+    def __init__(self, rect, game):
         self.game = game
-        self.icon = icon
-        self.name = name
-        self.author = author
-        self.description = description
         self.rect = rect
+        self.name = game.name
+        self.author = game.author
+        self.description = game.description
 
-        self.icon_image = pygame.transform.scale(pygame.image.load(icon), (self.ICON_SIZE, self.ICON_SIZE))
+        icon_path = game.path / game.icon
+        self.icon_image = pygame.transform.scale(
+            pygame.image.load(str(icon_path)), 
+            (self.ICON_SIZE, self.ICON_SIZE)
+        )
 
     def draw(self, screen):
+        # Оптимизировать создание текста; вынести его в класс
         pygame.draw.rect(screen, (50, 50, 50), self.rect, border_radius=10)
 
         icon = self.icon_image
@@ -105,9 +110,7 @@ class Menu:
             try:
                 metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
 
-                module = importlib.import_module(f"games.{path.name}")
-
-                game = Game(module, path, metadata)
+                game = Game(path, metadata)
 
                 games.append(game)
 
@@ -135,7 +138,7 @@ class Menu:
         
             card_rect = self.get_card_rect(num)
 
-            cards.append(Card(icon_path, name, author, description, card_rect, game))
+            cards.append(Card(card_rect, game))
 
         return cards
 
@@ -146,9 +149,7 @@ class Menu:
     def check_card_click(self, event):
         for card in self.cards:
             if card.handle_click(event.pos):
-                # После выхода из игры восстанавливаем экран меню:
-                self.screen = pygame.display.set_mode((self.width, self.height))
-                pygame.display.set_caption("Pygame Collab")
+                pygame.event.clear()
                 break
 
     def handle_events(self):
