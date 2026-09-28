@@ -9,6 +9,25 @@ Each game is isolated in its own folder, runs in its own process, and is automat
 
 ---
 
+## 📸 Preview
+
+![Pygame Collab Menu](images/screenshot.png)
+
+---
+
+## 🌟 Want to add a game?
+
+Have a fun mini-game idea or already built something in Pygame? **We'd love to feature your game!** 🚀
+
+Adding your game is super easy:
+1. Create a folder in `games/` with your game code.
+2. Add a `metadata.json` manifest and an optional icon.
+3. Submit a Pull Request!
+
+👉 Check out our complete **[Contribution Guide (CONTRIBUTING.md)](CONTRIBUTING.md)** for detailed instructions, template files, and best practices!
+
+---
+
 ## 📋 Table of Contents
 
 - [Features](#-features)
@@ -100,7 +119,7 @@ Click on any game card to launch it!
 
 ## 🛠️ How to Add Your Game (Contributing Guide)
 
-We welcome contributions from developers of all skill levels! Follow the steps below to add your game.
+We welcome contributions from developers of all skill levels! For a comprehensive guide, please refer to **[CONTRIBUTING.md](CONTRIBUTING.md)**. Here is a quick overview:
 
 ### 1. Directory Setup
 
@@ -136,7 +155,7 @@ Every game folder must include a `metadata.json` file in UTF-8 encoding:
 | `name` | string | **Yes** | — | Display title of the game. |
 | `author` | string | **Yes** | — | Author's name or GitHub username. |
 | `description` | string | **Yes** | — | Short description (1-3 sentences). |
-| `icon` | string | **Yes** | — | Relative filename of the icon (e.g. `icon.png`). |
+| `icon` | string | No | — | Relative filename of the icon (e.g. `icon.png`). |
 | `entry_point` | string | No | `"main.py"` | Relative script file executed on launch. |
 | `version` | string | No | `"1.0.0"` | Current version string. |
 
