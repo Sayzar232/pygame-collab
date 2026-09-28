@@ -14,6 +14,7 @@ CARD_X = 300
 CARD_Y = 500
 CARD_INDENT = 25
 GAMES_DIR = Path("games")
+PLACEHOLER_ICON = "placeholder_icon"
 
 
 @dataclass
@@ -30,7 +31,7 @@ class GameMetadata:
         if not isinstance(data, dict):
             raise ValueError(f"Метаданные должны быть JSON-объектом, получено: {type(data).__name__}")
 
-        required_fields = ["name", "author", "description", "icon"]
+        required_fields = ["name", "author", "description"]
         for field in required_fields:
             val = data.get(field)
             if val is None or not isinstance(val, str) or not val.strip():
@@ -39,7 +40,6 @@ class GameMetadata:
         name = data["name"].strip()
         author = data["author"].strip()
         description = data["description"].strip()
-        icon = data["icon"].strip()
 
         entry_point = data.get("entry_point", "main.py")
         if not isinstance(entry_point, str) or not entry_point.strip():
@@ -56,6 +56,10 @@ class GameMetadata:
             raise FileNotFoundError(f"Файл запуска '{entry_point}' не найден в {base_dir}")
 
         version = str(data.get("version", "1.0.0"))
+        icon = str(data.get("icon", PLACEHOLER_ICON))
+
+        if not icon.strip():
+            icon = PLACEHOLER_ICON
 
         return cls(
             name=name,
@@ -111,7 +115,7 @@ def create_placeholder_icon(size: int, label: str = "?") -> pygame.Surface:
 
 def load_game_icon(game_path: Path, icon_rel_path: str, size: int) -> pygame.Surface:
     """Безопасно загружает и масштабирует иконку игры с защитой от ошибок и падений."""
-    if not icon_rel_path:
+    if not icon_rel_path or icon_rel_path == PLACEHOLER_ICON:
         return create_placeholder_icon(size)
 
     icon_path = (game_path / icon_rel_path).resolve()
