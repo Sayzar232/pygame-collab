@@ -1,0 +1,8 @@
+{
+    "name": "Four in a row",
+    "author": "Sayzar232",
+    "description": "4 in a row game for two players",
+    "version": "1.0.0",
+    "icon": "",
+    "entry_point": "game.py"
+}
