@@ -59,7 +59,7 @@ def menu():
         screen.fill((30, 30, 40))
 
         # Title
-        title_surf = font_title.render("4 в ряд", True, (245, 245, 245))
+        title_surf = font_title.render("4 in a row", True, (245, 245, 245))
         title_rect = title_surf.get_rect(center=(center_x, height // 4))
         screen.blit(title_surf, title_rect)
 
@@ -67,7 +67,7 @@ def menu():
         hovered1 = btn1_rect.collidepoint(mouse_pos)
         color1 = (240, 120, 90) if hovered1 else (220, 80, 60)
         pygame.draw.rect(screen, color1, btn1_rect, border_radius=16)
-        text1 = font_button.render("Играть с другом (1vs1)", True, (255, 255, 255))
+        text1 = font_button.render("Play with friend (1vs1)", True, (255, 255, 255))
         text1_rect = text1.get_rect(center=btn1_rect.center)
         screen.blit(text1, text1_rect)
 
@@ -75,12 +75,12 @@ def menu():
         hovered2 = btn2_rect.collidepoint(mouse_pos)
         color2 = (80, 130, 240) if hovered2 else (60, 110, 220)
         pygame.draw.rect(screen, color2, btn2_rect, border_radius=16)
-        text2 = font_button.render("Играть с ботом (CPU)", True, (255, 255, 255))
+        text2 = font_button.render("Play with bot (CPU)", True, (255, 255, 255))
         text2_rect = text2.get_rect(center=btn2_rect.center)
         screen.blit(text2, text2_rect)
 
         # Subtle caption
-        caption = pygame.font.Font(None, 22).render("Нажмите кнопку для начала", True, (200, 200, 200))
+        caption = pygame.font.Font(None, 22).render("Press a button for start", True, (200, 200, 200))
         screen.blit(caption, (center_x - caption.get_width() // 2, start_y + 260))
 
         if mouse_pressed:
@@ -110,11 +110,11 @@ def check_for_win(col, row):
                 if balls_positions[row // cellsize - 3 + move_2[0]][5 - col + move_2[1]] == 1:
                     check_for_red_win += 1
                     if check_for_red_win == 4:
-                        print("Красный выиграл!")
+                        print("Red win!")
                 elif balls_positions[row // cellsize - 3 + move_2[0]][5 - col + move_2[1]] == 0:
                     check_for_blue_win += 1
                     if check_for_blue_win == 4:
-                        print("Синий выиграл!")
+                        print("Blue win!")
             except IndexError:
                 break
 

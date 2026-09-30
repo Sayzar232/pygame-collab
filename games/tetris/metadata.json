@@ -1,0 +1,8 @@
+{
+    "name": "Tetris",
+    "author": "Sayzar232",
+    "description": "Classic tetris game",
+    "version": "1.0.0",
+    "icon": "icon.png",
+    "entry_point": "main.py"
+}

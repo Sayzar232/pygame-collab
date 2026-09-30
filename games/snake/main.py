@@ -118,7 +118,7 @@ class Game:
             (WIDTH, HEIGHT)
         )
 
-        pygame.display.set_caption("Змейка")
+        pygame.display.set_caption("Snake")
 
         icon = pygame.image.load("icon.png")
         pygame.display.set_icon(icon)
@@ -188,7 +188,7 @@ class Game:
         self.food.draw(self.screen)
 
         score_text = self.font.render(
-            f"Счёт: {self.score}",
+            f"Score: {self.score}",
             True,
             WHITE
         )
@@ -197,7 +197,7 @@ class Game:
 
         if self.game_over:
             text = self.font.render(
-                "Игра окончена! R - рестарт",
+                "Game over! R - restart",
                 True,
                 WHITE
             )
