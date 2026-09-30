@@ -13,6 +13,7 @@ logger = logging.getLogger("Launcher")
 CARD_X = 300
 CARD_Y = 500
 CARD_INDENT = 25
+SCROLL_SPEED = 15
 GAMES_DIR = Path("games")
 PLACEHOLER_ICON = "placeholder_icon"
 
@@ -250,6 +251,7 @@ class Menu:
         self.clock = pygame.time.Clock()
         self.games = self.discover_games()
         self.cards = self.get_cards()
+        self.scroll_y = 0
 
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Pygame Collab")
@@ -318,14 +320,21 @@ class Menu:
                 pygame.event.clear()
                 break
 
+    def handle_mouse_wheel(self, event: pygame.event.Event):
+        for card in self.cards:
+            card.rect.move_ip(0, event.y * SCROLL_SPEED)
+
     def handle_events(self) -> bool:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONUP:
-                self.check_card_mouse(event)
+                if event.button == 1:
+                    self.check_card_mouse(event)
             elif event.type == pygame.MOUSEMOTION:
                 self.check_card_mouse(event)
+            elif event.type == pygame.MOUSEWHEEL:
+                self.handle_mouse_wheel(event)
 
         return True
 
