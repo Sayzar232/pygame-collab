@@ -13,9 +13,9 @@ logger = logging.getLogger("Launcher")
 CARD_X = 300
 CARD_Y = 500
 CARD_INDENT = 25
-SCROLL_SPEED = 15
+SCROLL_SPEED = 20
 GAMES_DIR = Path("games")
-PLACEHOLER_ICON = "placeholder_icon"
+PLACEHOLDER_ICON = "placeholder_icon"
 
 
 @dataclass
@@ -57,10 +57,10 @@ class GameMetadata:
             raise FileNotFoundError(f"Файл запуска '{entry_point}' не найден в {base_dir}")
 
         version = str(data.get("version", "1.0.0"))
-        icon = str(data.get("icon", PLACEHOLER_ICON))
+        icon = str(data.get("icon", PLACEHOLDER_ICON))
 
         if not icon.strip():
-            icon = PLACEHOLER_ICON
+            icon = PLACEHOLDER_ICON
 
         return cls(
             name=name,
@@ -116,7 +116,7 @@ def create_placeholder_icon(size: int, label: str = "?") -> pygame.Surface:
 
 def load_game_icon(game_path: Path, icon_rel_path: str, size: int) -> pygame.Surface:
     """Безопасно загружает и масштабирует иконку игры с защитой от ошибок и падений."""
-    if not icon_rel_path or icon_rel_path == PLACEHOLER_ICON:
+    if not icon_rel_path or icon_rel_path == PLACEHOLDER_ICON:
         return create_placeholder_icon(size)
 
     icon_path = (game_path / icon_rel_path).resolve()
@@ -198,36 +198,52 @@ class Card:
         self.description = game.description
         self.card_color = self.CARD_COLOR
         self.icon_image = load_game_icon(game.path, game.icon, self.ICON_SIZE)
+        self.max_text_width = rect.width - 2 * self.INDENT
+
+        self.name_surf = self.get_name_surf()
+        self.author_surf = self.get_author_surf()
+
+        self.desc_font = pygame.font.SysFont(self.FONT_NAME, self.DESCRIPTION_FONT_SIZE)
+        self.desc_lines = wrap_text(self.description, self.desc_font, self.max_text_width, max_lines=4)
+        self.line_height = self.desc_font.get_linesize()
+
+        self.lines_surf = self.get_lines_surf()
+
+    def get_name_surf(self):
+        name_font = pygame.font.SysFont(self.FONT_NAME, self.NAME_FONT_SIZE, bold=True)
+        display_name = truncate_text(self.name, name_font, self.max_text_width)
+        return name_font.render(display_name, True, self.TEXT_COLOR)
+
+    def get_author_surf(self):
+        author_font = pygame.font.SysFont(self.FONT_NAME, self.AUTHOR_FONT_SIZE)
+        display_author = truncate_text(f"by {self.author}", author_font, self.max_text_width)
+        return author_font.render(display_author, True, self.AUTHOR_COLOR)
+
+    def get_lines_surf(self):
+        lines_surf = []
+        
+        for line in self.desc_lines:
+            lines_surf.append(self.desc_font.render(line, True, self.DESC_COLOR))
+
+        return lines_surf
 
     def draw(self, screen: pygame.Surface) -> None:
-        # Оптимизировать создание текста и шрифтов
         pygame.draw.rect(screen, self.card_color, self.rect, border_radius=10)
 
         screen.blit(self.icon_image, (self.rect.x + self.INDENT, self.rect.y + self.INDENT))
 
-        max_text_width = self.rect.width - 2 * self.INDENT
         rect_center_x = self.rect.centerx
 
-        name_font = pygame.font.SysFont(self.FONT_NAME, self.NAME_FONT_SIZE, bold=True)
-        display_name = truncate_text(self.name, name_font, max_text_width)
-        name_surf = name_font.render(display_name, True, self.TEXT_COLOR)
-        name_rect = name_surf.get_rect(center=(rect_center_x, self.rect.y + 310))
-        screen.blit(name_surf, name_rect)
+        name_rect = self.name_surf.get_rect(center=(rect_center_x, self.rect.y + 310))
+        screen.blit(self.name_surf, name_rect)
 
-        author_font = pygame.font.SysFont(self.FONT_NAME, self.AUTHOR_FONT_SIZE)
-        display_author = truncate_text(f"by {self.author}", author_font, max_text_width)
-        author_surf = author_font.render(display_author, True, self.AUTHOR_COLOR)
-        author_rect = author_surf.get_rect(center=(rect_center_x, self.rect.y + 350))
-        screen.blit(author_surf, author_rect)
+        author_rect = self.author_surf.get_rect(center=(rect_center_x, self.rect.y + 350))
+        screen.blit(self.author_surf, author_rect)
 
-        desc_font = pygame.font.SysFont(self.FONT_NAME, self.DESCRIPTION_FONT_SIZE)
-        desc_lines = wrap_text(self.description, desc_font, max_text_width, max_lines=4)
         start_y = self.rect.y + 385
-        line_height = desc_font.get_linesize()
 
-        for i, line in enumerate(desc_lines):
-            line_surf = desc_font.render(line, True, self.DESC_COLOR)
-            line_rect = line_surf.get_rect(center=(rect_center_x, start_y + i * line_height))
+        for i, line_surf in enumerate(self.lines_surf):
+            line_rect = line_surf.get_rect(center=(rect_center_x, start_y + i * self.line_height))
             screen.blit(line_surf, line_rect)
 
     def handle_mouse(self, event: pygame.event.Event):
@@ -349,6 +365,4 @@ class Menu:
 
             pygame.display.update()
             self.clock.tick(60)
-
-
-menu = Menu()
+            print(self.clock.get_fps())

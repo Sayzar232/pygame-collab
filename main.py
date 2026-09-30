@@ -1,9 +1,13 @@
 import pygame
-from launcher import menu
+from launcher import Menu
 
-pygame.init()
 
-if __name__ == "__main__":
+def main() -> None:
+    pygame.init()
+    menu = Menu()
     menu.run()
 
+
+if __name__ == "__main__":
+    main()
     pygame.quit()
