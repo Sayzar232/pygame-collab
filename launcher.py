@@ -209,17 +209,17 @@ class Card:
 
         self.lines_surf = self.get_lines_surf()
 
-    def get_name_surf(self):
+    def get_name_surf(self) -> pygame.Surface:
         name_font = pygame.font.SysFont(self.FONT_NAME, self.NAME_FONT_SIZE, bold=True)
         display_name = truncate_text(self.name, name_font, self.max_text_width)
         return name_font.render(display_name, True, self.TEXT_COLOR)
 
-    def get_author_surf(self):
+    def get_author_surf(self) -> pygame.Surface:
         author_font = pygame.font.SysFont(self.FONT_NAME, self.AUTHOR_FONT_SIZE)
         display_author = truncate_text(f"by {self.author}", author_font, self.max_text_width)
         return author_font.render(display_author, True, self.AUTHOR_COLOR)
 
-    def get_lines_surf(self):
+    def get_lines_surf(self) -> pygame.Surface:
         lines_surf = []
         
         for line in self.desc_lines:

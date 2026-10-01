@@ -11,7 +11,7 @@ Each game is isolated in its own folder, runs in its own process, and is automat
 
 ## 📸 Preview
 
-![Pygame Collab Menu](images/screenshot.png)
+![Pygame Collab Menu](media/launcher.gif)
 
 ---
 
